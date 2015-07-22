@@ -1,0 +1,53 @@
+<?php
+
+/**
+ * @file
+ * Contains service.json implementation.
+ */
+
+
+/**
+ * Implements hook_menu().
+ */
+function services_json_menu() {
+  $items = array();
+
+  $items['services.json'] = array(
+    'title' => 'Services information',
+    'access arguments' => array('access services.json'),
+    'page callback' => 'services_json_get_list',
+    'type' => MENU_CALLBACK,
+  );
+  return $items;
+}
+
+/**
+ * Implements hook_permission().
+ */
+function services_json_permission() {
+  return array('access services.json');
+}
+
+/**
+ * Page callback.
+ */
+function services_json_get_list() {
+  $list = array();
+  if (module_exists('services')) {
+    $list = services_endpoint_load_all();
+  }
+  if ($custom = module_invoke_all('services_json_info')) {
+    $list = array_merge($list, $custom);
+  }
+  return drupal_json_output($list);
+}
+
+/**
+ * Implements hook_hook_info().
+ */
+function services_json_hook_info() {
+  $hooks['services_json_info'] = array(
+    'group' => 'services',
+  );
+  return $hooks;
+}

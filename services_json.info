@@ -1,1 +1,5 @@
 name = services.json
+description = Provides meta data of exposed/available services.
+package = Services
+core = 7.x
+php = 5.x
