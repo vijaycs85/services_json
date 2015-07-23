@@ -39,6 +39,7 @@ function services_json_get_list() {
   if ($custom = module_invoke_all('services_json_info')) {
     $list = array_merge($list, $custom);
   }
+
   return drupal_json_output($list);
 }
 
