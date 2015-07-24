@@ -25,17 +25,20 @@ function services_json_menu() {
  * Implements hook_permission().
  */
 function services_json_permission() {
-  return array('access services.json');
+  return array(
+    'access services.json' => array(
+      'title' => t('Access services modules'),
+    ),
+  );
 }
 
 /**
  * Page callback.
  */
 function services_json_get_list() {
-  $list = array();
-  if (module_exists('services')) {
-    $list = services_endpoint_load_all();
-  }
+  // Add services module endpoints.
+  $list = services_json_get_auto_deducted_endpoints();
+  // List of services exposed by custom hook.
   if ($custom = module_invoke_all('services_json_info')) {
     $list = array_merge($list, $custom);
   }
@@ -51,4 +54,35 @@ function services_json_hook_info() {
     'group' => 'services',
   );
   return $hooks;
+}
+
+/**
+ * Process endpoints exposed by services and other obvious modules.
+ */
+function services_json_get_auto_deducted_endpoints() {
+  $services = array();
+
+  // Services module.
+  if (module_exists('services')) {
+    $endpoints = services_endpoint_load_all();
+    foreach ($endpoints as $endpoint) {
+      if (empty($endpoint->disabled)) {
+        $service = services_endpoint_load($endpoint->name);
+        $server = $endpoint->server;
+        try {
+          foreach (ServicesJsonServiceMapping::createFromEndpoint($service, $server) as $service_object) {
+            $services['services'][] = $service_object->getAsArray();
+          }
+        }
+        catch (Exception $e) {
+
+        }
+
+      }
+    }
+  }
+
+  // SOAP Server module.
+
+  return $services;
 }

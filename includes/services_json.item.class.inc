@@ -4,29 +4,6 @@
  * Contains classes and interfaces.
  */
 
-/**
- * Interface ServiceJsonItemInterface
- */
-interface ServicesJsonItemInterface {
-
-  /**
-   * @return mixed
-   */
-  public function getId();
-
-  public function getDescription();
-
-  public function getDomain();
-
-  public function getEndpointLocation();
-
-  public function getEndpointProtocol();
-
-  public function getEndpointContactType();
-
-  public function getEnvironment();
-
-}
 
 
 /**
@@ -184,6 +161,19 @@ abstract class ServicesJsonItemBase  {
     return $this;
   }
 
+
+  public function getAsArray() {
+    return array(
+      'id' => $this->getId(),
+      'description' => $this->getDescription(),
+      'domain' => $this->getDomain(),
+      'endpoint_location' => $this->getEndpointLocation(),
+      'endpoint_protocol' => $this->getEndpointProtocol(),
+      'endpoint_content_type' => $this->getEndpointContentType(),
+      'environment' => $this->getEnvironment(),
+
+    );
+  }
 }
 
 /**
@@ -192,7 +182,7 @@ abstract class ServicesJsonItemBase  {
 class ServicesJsonServiceMapping extends ServicesJsonItemBase implements ServicesJsonItemInterface {
 
 
-  public static function create($values) {
+  public  static function create($values) {
     return new static(
       $values['id'],
       $values['description'],
@@ -203,6 +193,31 @@ class ServicesJsonServiceMapping extends ServicesJsonItemBase implements Service
       $values['environment']
     );
   }
+
+  public static function createFromEndpoint($service, $server) {
+    foreach ($service->resources as $resource_id => $resource) {
+      foreach ($resource['operations'] as $operation_id => $operation) {
+        $id_parts = array(
+          'services',
+          $service->name,
+          $resource_id,
+          $operation_id
+        );
+        $values = array(
+          'id' => implode('_', $id_parts),
+          'description' => 'define please',
+          'domain' => 'SERVICES',
+          'endpoint_location' => 'todo',
+          'endpoint_protocol' => 'todo',
+          'endpoint_content_type' => 'todo',
+          'environment' => 'todo',
+        );
+        $services[] = self::create($values);
+      }
+    }
+    return $services;
+  }
+
   /**
    * {@inheritdoc}
    */

@@ -3,3 +3,7 @@ description = Provides meta data of exposed/available services.
 package = Services
 core = 7.x
 php = 5.x
+
+files[] = includes/services_json.interface.inc
+files[] = includes/services_json.item.class.inc
+files[] = includes/services_json.formatter.class.inc
