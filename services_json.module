@@ -39,10 +39,23 @@ function services_json_get_list() {
   // Add services module endpoints.
   $list = services_json_get_auto_deducted_endpoints();
   // List of services exposed by custom hook.
-  if ($custom = module_invoke_all('services_json_info')) {
-    $list = array_merge($list, $custom);
+  if ($custom_services = module_invoke_all('services_json_info')) {
+    $list = array_merge($list, $custom_services);
   }
 
+  if (!empty($list)) {
+    /* @var  $service ServicesJsonItemInterface */
+    foreach ($list as $service) {
+      $output[$service->getDomain()][] = $service->getAsArray();
+    }
+    ksort($output);
+  }
+  else {
+    $output = array(
+      'status' => 'error',
+      'message' => 'No service description available',
+    );
+  }
   return drupal_json_output($list);
 }
 
@@ -71,7 +84,7 @@ function services_json_get_auto_deducted_endpoints() {
         $server = $endpoint->server;
         try {
           foreach (ServicesJsonServiceMapping::createFromEndpoint($service, $server) as $service_object) {
-            $services['services'][] = $service_object->getAsArray();
+            $services[] = $service_object;
           }
         }
         catch (Exception $e) {

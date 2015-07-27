@@ -13,7 +13,9 @@ interface ServicesJsonItemInterface {
   /**
    * @return mixed
    */
-  public function getId();
+  public function getName();
+
+  public function getVersion();
 
   public function getDescription();
 
@@ -23,7 +25,7 @@ interface ServicesJsonItemInterface {
 
   public function getEndpointProtocol();
 
-  public function getEndpointContactType();
+  public function getEndpointContractType();
 
   public function getEnvironment();
 

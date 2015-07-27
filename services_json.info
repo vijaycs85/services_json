@@ -7,3 +7,5 @@ php = 5.x
 files[] = includes/services_json.interface.inc
 files[] = includes/services_json.item.class.inc
 files[] = includes/services_json.formatter.class.inc
+files[] = includes/mapping/services_json.mapping.class.inc
+files[] = includes/services_json.endpoint.class.inc

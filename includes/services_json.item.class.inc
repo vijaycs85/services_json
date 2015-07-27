@@ -1,20 +1,24 @@
 <?php
+
 /**
  * @file
- * Contains classes and interfaces.
+ *
  */
-
-
 
 /**
  * Class ServiceJsonItemBase
  */
-abstract class ServicesJsonItemBase  {
+class ServicesJsonItem implements ServicesJsonItemInterface {
 
   /**
    * @var string
    */
-  protected $id;
+  protected $name;
+
+  /**
+   * @var string
+   */
+  protected $version;
 
   /**
    * @var string
@@ -29,45 +33,58 @@ abstract class ServicesJsonItemBase  {
   /**
    * @var string
    */
-  protected $endpointLocation;
-
-  /**
-   * @var string
-   */
-  protected $endpointProtocol;
-
-  /**
-   * @var string
-   */
-  protected $endpointContentType;
+  protected $endpoint;
 
   /**
    * @var string
    */
   protected $environment;
 
-  public function __construct($id, $description, $domain, $endpoint_location, $endpoint_protocol, $endpoint_content_type, $environment) {
-    $this->id = $id;
+  public function __construct($name, $description, $domain, array $endpoint, $environment) {
+    $this->name = $name;
     $this->description = $description;
     $this->domain = $domain;
-    $this->endpointLocation = $endpoint_location;
-    $this->endpointProtocol = $endpoint_protocol;
-    $this->endpointContentType = $endpoint_content_type;
+    $this->endpoint = ServiceJsonEndpoint::create($endpoint);
     $this->environment = $environment;
   }
 
-  /**
-   * {@inheritdoc}
-   */
-  public function getId() {
-    return $this->id;
+  public  static function create(array $definition) {
+    return new static(
+      $definition['name'],
+      $definition['description'],
+      $definition['domain'],
+      $definition['endpoint'],
+      $definition['environment']
+    );
   }
 
   /**
    * {@inheritdoc}
    */
-  public function setId($id) {
-    $this->id = $id;
+  public function getName() {
+    return $this->name;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setName($name) {
+    $this->name = $name;
+    return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getVersion() {
+    return $this->version;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setVersion($version) {
+    $this->version = $version;
     return $this;
   }
 
@@ -105,45 +122,21 @@ abstract class ServicesJsonItemBase  {
    * {@inheritdoc}
    */
   public function getEndpointLocation() {
-    return $this->endpointLocation;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function setEndpointLocation($endpointLocation) {
-    $this->endpointLocation = $endpointLocation;
-    return $this;
+    return $this->endpoint->getLocation();
   }
 
   /**
    * {@inheritdoc}
    */
   public function getEndpointProtocol() {
-    return $this->endpointProtocol;
+    return $this->endpoint->getProtocol();
   }
 
   /**
    * {@inheritdoc}
    */
-  public function setEndpointProtocol($endpointProtocol) {
-    $this->endpointProtocol = $endpointProtocol;
-    return $this;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getEndpointContentType() {
-    return $this->endpointContentType;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function setEndpointContentType($endpointContentType) {
-    $this->endpointContentType = $endpointContentType;
-    return $this;
+  public function getEndpointContractType() {
+    return $this->endpoint->getContractType();
   }
 
   /**
@@ -161,110 +154,31 @@ abstract class ServicesJsonItemBase  {
     return $this;
   }
 
-
+  /**
+   * {@inheritdoc}
+   */
   public function getAsArray() {
     return array(
-      'id' => $this->getId(),
+      'name' => $this->getName(),
+      'version' => $this->getVersion(),
       'description' => $this->getDescription(),
       'domain' => $this->getDomain(),
-      'endpoint_location' => $this->getEndpointLocation(),
-      'endpoint_protocol' => $this->getEndpointProtocol(),
-      'endpoint_content_type' => $this->getEndpointContentType(),
       'environment' => $this->getEnvironment(),
-
+      'serviceEndpoints' => array (
+        'url' => $this->getEndpointLocation(),
+        'protocol'=> $this->getEndpointProtocol(),
+        'contractType'=> $this->getEndpointContractType(),
+      ),
+      'serviceEnvironment' => 'QA',
+      // No properties for below elements yet.
+      'contacts' => array(
+        'developers' => array(''),
+        'business_owners' => array(''),
+      ),
+      'documentation' => array(
+        'links' => array(''),
+      ),
     );
-  }
-}
-
-/**
- * Class ServiceJsonServiceMapping
- */
-class ServicesJsonServiceMapping extends ServicesJsonItemBase implements ServicesJsonItemInterface {
-
-
-  public  static function create($values) {
-    return new static(
-      $values['id'],
-      $values['description'],
-      $values['domain'],
-      $values['endpoint_location'],
-      $values['endpoint_protocol'],
-      $values['endpoint_content_type'],
-      $values['environment']
-    );
-  }
-
-  public static function createFromEndpoint($service, $server) {
-    foreach ($service->resources as $resource_id => $resource) {
-      foreach ($resource['operations'] as $operation_id => $operation) {
-        $id_parts = array(
-          'services',
-          $service->name,
-          $resource_id,
-          $operation_id
-        );
-        $values = array(
-          'id' => implode('_', $id_parts),
-          'description' => 'define please',
-          'domain' => 'SERVICES',
-          'endpoint_location' => 'todo',
-          'endpoint_protocol' => 'todo',
-          'endpoint_content_type' => 'todo',
-          'environment' => 'todo',
-        );
-        $services[] = self::create($values);
-      }
-    }
-    return $services;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getId() {
-
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getDescription() {
-
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getDomain() {
-
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getEndpointLocation() {
-
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getEndpointProtocol() {
-
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getEndpointContactType() {
-
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getEnvironment() {
-
   }
 
 }
