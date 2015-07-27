@@ -22,7 +22,7 @@ class ServicesJsonServiceMapping {
   public static function createFromEndpoint($service, $server) {
     $services = array();
     foreach ($service->resources as $resource_name => $resource) {
-      foreach ($resource['actions'] as $operation_name => $operation) {
+      foreach ($resource['operations'] as $operation_name => $operation) {
         $name_parts = array(
           'services',
           $service->name,
